@@ -22,6 +22,13 @@ The change adds exactly two IL instructions (`ldc.i4.1; call set_runInBackground
 and leaves every other method byte-identical (verified: type/method/body counts
 unchanged, instruction count +2, all bodies re-parse).
 
+## Deferred fixes
+
+The remaining DLL-bound crashes (torpedo/missile/save-load NREs, etc.) are
+documented in [`DEFERRED.md`](DEFERRED.md) with resolved method names, risk
+level, what's needed to fix each (usually a stack trace), and a candidate
+approach. Read it before picking up the next DLL fix.
+
 ## Reproduce
 
 See the header of `run.sh` for prerequisites, then:
