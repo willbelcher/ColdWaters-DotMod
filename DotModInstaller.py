@@ -10,6 +10,70 @@ import shutil
 # Config (This installer is meant to be universal, for both the main mod and addons)
 import configparser
 
+# Parsing Steam's libraryfolders.vdf to find games on secondary drives
+import re
+
+
+# Steam always stores the game in a folder named "Cold Waters"
+GAME_FOLDER = "Cold Waters"
+
+
+def steam_library_roots():
+    """Return likely Steam install roots across platforms.
+
+    Covers Windows drives, native Linux Steam (including the Flatpak and the
+    Debian/Ubuntu installation layouts) and macOS. Also reads each root's
+    libraryfolders.vdf so games installed on secondary drives are picked up.
+    Forward slashes are used throughout; Windows accepts them as well.
+    """
+    home = os.path.expanduser("~")
+    candidates = [
+        # Windows
+        "C:/Program Files (x86)/Steam",
+        "D:/Steam",
+        "D:/Games/Steam",
+        "D:/SteamLibrary",
+        "E:/SteamLibrary",
+        # Linux (native, Flatpak and distro-specific layouts)
+        f"{home}/.steam/steam",
+        f"{home}/.steam/root",
+        f"{home}/.steam/debian-installation",
+        f"{home}/.local/share/Steam",
+        f"{home}/.var/app/com.valvesoftware.Steam/.local/share/Steam",
+        # macOS
+        f"{home}/Library/Application Support/Steam",
+    ]
+
+    roots = list(candidates)
+    for root in candidates:
+        for vdf in (
+            f"{root}/steamapps/libraryfolders.vdf",
+            f"{root}/config/libraryfolders.vdf",
+        ):
+            if os.path.exists(vdf):
+                try:
+                    with open(vdf, "r", encoding="utf-8", errors="ignore") as handle:
+                        for match in re.findall(r'"path"\s+"([^"]+)"', handle.read()):
+                            # VDF stores Windows paths with escaped backslashes
+                            roots.append(match.replace("\\\\", "/").replace("\\", "/"))
+                except OSError:
+                    pass
+
+    return roots
+
+
+def find_install_directory():
+    """Auto-locate the Cold Waters install across Windows, Linux and macOS."""
+    seen = set()
+    for root in steam_library_roots():
+        path = f"{root}/steamapps/common/{GAME_FOLDER}"
+        if path in seen:
+            continue
+        seen.add(path)
+        if os.path.isdir(path):
+            return path
+    return None
+
 
 # Good programming practices
 def main():
@@ -18,21 +82,17 @@ def main():
     mod_name = config["Settings"]["mod_name"]
     mod = "%s/ColdWaters_Data" % (os.getcwd())
 
-    # Auto-locate; Simply checks likely locations for the game to be installed to
-    if os.path.exists("C:/Program Files (x86)/Steam/steamapps/common/Cold Waters"):
-        install_directory = "C:/Program Files (x86)/Steam/steamapps/common/Cold Waters"
+    # Auto-locate; checks likely Steam locations on Windows, Linux and macOS
+    install_directory = find_install_directory()
 
-    elif os.path.exists("D:/Steam/steamapps/common/Cold Waters"):
-        install_directory = "D:/Steam/steamapps/common/Cold Waters"
-
-    elif os.path.exists("D:/Games/steamapps/common/Cold Waters"):
-        install_directory = "D:/Games/steamapps/common/Cold Waters"
-
-    else:
+    if install_directory is None:
         print("Auto-locate failed.")
         install_directory = input(
             "Please input the directory of your Cold Waters install: "
         )
+
+    else:
+        print(f"Found Cold Waters at {install_directory}.")
 
     # Make sure everything's correct:
     if (

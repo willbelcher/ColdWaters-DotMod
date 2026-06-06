@@ -183,6 +183,23 @@
 ## Installation
 DotMod comes with an installer that will walk you through the steps of installation (unfortunately this does NOT work on Windows 7 at present). If this fails, a manual install can be performed by following these instructions: https://github.com/DotModGroup/ColdWaters-DotMod/blob/main/DotMod_Installer.pdf
 
+### Linux / Steam Deck (Proton)
+Cold Waters is a Windows-only Unity game, so on Linux it runs through **Proton** (Valve's Wine-based compatibility layer). DotMod runs fine under Proton because the modded game files and `Assembly-CSharp.dll` execute inside the Proton/Wine prefix exactly as they would on Windows. A few extra steps are needed:
+
+1. **Force Proton for Cold Waters.** In Steam, right-click *Cold Waters -> Properties -> Compatibility -> Force the use of a specific Steam Play compatibility tool* and pick a recent Proton (Proton Experimental or the latest stable both work). Launch the game once to create the prefix.
+2. **Install the mod.** Two options:
+   * **Native Python installer (recommended):** extract the release, then from the mod folder run
+     ```
+     python3 DotModInstaller.py
+     ```
+     The installer auto-detects native, Flatpak and Steam Deck Steam libraries (including games on secondary drives via `libraryfolders.vdf`); if detection fails it will prompt for your Cold Waters directory. On Steam Deck, run this from Desktop Mode.
+   * **Windows installer via Proton/Wine:** `DotModInstaller.exe` also works when run through Wine/Proton.
+3. **Enable the mod.** DotMod uses JSGME (a Windows tool) to toggle mods. Run `JSGME.exe` through the **same** Proton/Wine prefix as the game, enable `DotMod` first, then any addons. Alternatively, enable it manually by copying the contents of `MODS/DotMod/ColdWaters_Data` over the game's `ColdWaters_Data` (back up the originals first).
+
+**First-run validation note:** DotMod runs a one-time base-game integrity check on first launch. On Linux/Proton the original check could exhaust memory and hang on `resources.assets.resS` (see [issue #31](https://github.com/DotModGroup/ColdWaters-DotMod/issues/31)); the bundled `Cold Waters 1_15g.mf` manifest now validates only small core files, which avoids the out-of-memory hang while still confirming you have the correct vanilla game version.
+
+> Note: the manual-install PDF and the Mac install tutorial screenshots may be out of date (see issues [#174](https://github.com/DotModGroup/ColdWaters-DotMod/issues/174) and [#187](https://github.com/DotModGroup/ColdWaters-DotMod/issues/187)). If you get stuck, ask on the Discord #tech-support channel.
+
 ## Support  
 If you have trouble with DotMod, please let us know on our #tech-support Discord channel, and we will endeavour to sort you out. Alternatively, raise an Issue here on GitHub. Be sure to include an output_log.txt and a description of what caused the error to occur (or at the very least what you were doing when it happened).
 
