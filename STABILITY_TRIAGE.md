@@ -54,7 +54,7 @@ Crashes / logic bugs in compiled code. Targets for the DLL branch.
 | 86 | `VoiceManager.PlayMessageLogVoice` array index out of range ("LostSonarContact") | voice index selection (data row & wav are valid → DLL-side) |
 | 80 | MOSS Mk 70 sea-skimming under time compression | physics under time compression |
 | 65 | Crew won't dive after Emergency Blow | depth-order state machine |
-| 190 | Game pauses/minimizes when unfocused | Unity "Run In Background" (player setting, baked into engine config) |
+| 190 | Game pauses/minimizes when unfocused | **FIXED on `claude/cold-waters-dotmod-dll-patches`**: injected `Application.runInBackground = true` into `LevelLoadManager::Awake` via `tools/dll-patcher`. |
 | 136 / 114 / 113 / 111 / 127 / 183 | Generic NRE / IndexOutOfRange / "Unity Engine" crashes | need stack/log to localize |
 
 ## NEEDS INFO (no actionable detail yet)
